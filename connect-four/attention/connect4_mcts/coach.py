@@ -86,9 +86,12 @@ class Coach:
 
     def train(self, batch_size: int, minibatch_size: int):
         states, y_pol, y_wdl = self.buffer.get_batch(batch_size)
-        self.model.train(states, y_pol, y_wdl, minibatch_size)
+        return self.model.train(states, y_pol, y_wdl, minibatch_size)
 
     def train_epochs(self, batch_size: int, minibatch_size: int, epochs: int):
+        losses = []
         for _ in range(epochs):
-            self.train(batch_size, minibatch_size)
+            loss = self.train(batch_size, minibatch_size)
+            losses.append(loss)
+        return np.mean(losses)
 

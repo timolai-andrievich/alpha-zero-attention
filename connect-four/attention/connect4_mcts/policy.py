@@ -44,14 +44,14 @@ class ResidualBlock(nn.Module):
         self.conv1 = ConvLayer(channels, channels)
         self.conv2 = nn.Conv2d(channels, channels, 3, 1, 'same')
         self.norm2 = nn.BatchNorm2d(channels)
-        self.se = SqueezeExcitation(channels)
+        # self.se = SqueezeExcitation(channels)
 
     def forward(self, x: torch.Tensor):
         shortcut = x
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.norm2(x)
-        x = self.se(x)
+        # x = self.se(x)
         return shortcut + x
 
 
@@ -65,7 +65,9 @@ class Network(nn.Module):
             nn.AdaptiveAvgPool2d((1, 1)),
             nn.Flatten(),
         )
-        self.transformer = nn.Transformer(channels, 8, 3, 3, 1024)
+        # encoder_layer = nn.TransformerEncoderLayer(channels, 8, 256)
+        # self.encoder = nn.TransformerEncoder(encoder_layer, 4)
+        self.transformer = nn.Transformer(channels, 8, 2, 2, 256)
         self.policy = nn.Sequential(
             nn.Linear(channels, game.Game.NUM_ACTIONS),
             nn.Softmax(dim=-1),
@@ -76,6 +78,7 @@ class Network(nn.Module):
         )
 
     def forward(self, x: torch.Tensor):
+        # TODO use only encoder and use appropriate src_mask
         x = self.init_conv(x)
         x = self.embed(x)[None, ...]
         x = self.transformer(x, x)
@@ -86,7 +89,7 @@ class Network(nn.Module):
 
 class Model:
     def __init__(self, channels: int, blocks: int, learning_rate: float, device: torch.device = None):
-        self.criterion = nn.CrossEntropyLoss()
+        self.criterion = nn.MSELoss()
         if device is None:
             device = 'cpu'
         self.device = device
@@ -121,11 +124,15 @@ class Model:
         self.optimizer.zero_grad()
         total_loss.backward()
         self.optimizer.step()
+        return total_loss.detach().cpu().numpy()
 
     def train(self, states: np.ndarray, y_pol: np.ndarray, y_wdl: np.ndarray, batch_size: int):
         # states = states.astype(np.float32)
         # y_pol = y_pol.astype(np.float32)
         # y_wdl = y_wdl.astype(np.float32)
+        losses = []
         for state, pol, wdl in zip(states, y_pol, y_wdl):
             state, pol, wdl = map(torch.from_numpy, (state, pol, wdl))
-            self.train_step(state, pol, wdl)
+            loss =self.train_step(state, pol, wdl)
+            losses.append(loss)
+        return np.mean(losses)

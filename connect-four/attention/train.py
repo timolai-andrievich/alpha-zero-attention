@@ -56,9 +56,10 @@ def main():
     for _ in pbar:
         c.generate_games(config['episodes_per_iteration'],
                          config['c_puct'], config['playout'], config['temp'])
-        c.train_epochs(config['batch_size'],
+        loss = c.train_epochs(config['batch_size'],
                        config['minibatch_size'], config['epochs'])
         model.save(args.output_model)
+        pbar.set_description(f'loss: {loss:.4f}')
     model.save(args.output_model)
 
 

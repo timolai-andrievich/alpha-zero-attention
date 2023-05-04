@@ -37,7 +37,7 @@ class Buffer:
 
     def get_batch(self, sample_size: int) -> Tuple[States, Policies, WDLs]:
         assert self.size > 0
-        indicies = np.random.randint(0, self.max_size, sample_size)
+        indicies = np.random.randint(0, self.size, sample_size)
         return self.states[indicies], self.y_pol[indicies], self.y_wdl[indicies]
 
 

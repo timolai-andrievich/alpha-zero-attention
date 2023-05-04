@@ -19,7 +19,7 @@ class ModelWrapper:
     def get_action(self):
         options = {
             'c_puct': 2 ** .5,
-            'n_playouts': 80,
+            'n_playouts': 180,
             'temp': 0.,
         }
         if not request.is_json:
@@ -61,7 +61,7 @@ class ModelWrapper:
 
 
 def create_app():
-    m = ModelWrapper(128, 10, 1e-4, 'cpu')
+    m = ModelWrapper(256, 1, 1e-4, 'cpu')
     app = Flask(__name__)
     CORS(app)
 

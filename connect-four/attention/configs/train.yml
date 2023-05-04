@@ -1,11 +1,11 @@
 # The amount of filters in convolutions
-filters: 128
+filters: 256
 
 # The amount of residual blocks in common part of the model
-blocks: 10
+blocks: 1
 
 # The maximum size of buffer holding the states
-buffer_size: 20000
+buffer_size: 4000
 
 # The amount of epochs the model trains for after an iteration
 epochs: 1
@@ -14,16 +14,16 @@ epochs: 1
 iterations: 1000
 
 # The learning rate passed into the optimizer
-learning_rate: .0002
+learning_rate: .00002
 
 # The number of MCTS simulations performed when choosing the next move
-playout: 80
+playout: 180
 
 # The number of games played in each iteration
 episodes_per_iteration: 10
 
 # The number of states sampled from the buffer for each training iteration
-batch_size: 20
+batch_size: 800
 
 # TODO: deadcode
 # The size of the minibatches each batch is split into
@@ -31,11 +31,11 @@ minibatch_size: 32
 
 # The C parameter in upper confidence bound formula 
 # (The higher, the more explorative the model will be)
-c_puct: 5
+c_puct: 1
 
 # The degree of randomness used when choosing the next move
 # 0 - choose the move with the highest expected value
-temp: 0
+temp: 1
 
 # The device to run the model on
 device: "cpu"

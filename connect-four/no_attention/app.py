@@ -7,7 +7,7 @@ from connect4_mcts.game import Game
 from connect4_mcts.policy import Model
 from connect4_mcts.players import MctsPlayer
 
-SVELTE_STATIC_PATH = '../client/build'
+SVELTE_STATIC_PATH = './client/build'
 
 
 class ModelWrapper:
@@ -18,7 +18,7 @@ class ModelWrapper:
     def get_action(self):
         options = {
             'c_puct': 2 ** .5,
-            'n_playouts': 80,
+            'n_playouts': 180,
             'temp': 0.,
         }
         if not request.is_json:
