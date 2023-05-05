@@ -11,7 +11,7 @@ buffer_size: 4000
 epochs: 1
 
 # The number of training iterations
-iterations: 1000
+iterations: 10
 
 # The learning rate passed into the optimizer
 learning_rate: .00002

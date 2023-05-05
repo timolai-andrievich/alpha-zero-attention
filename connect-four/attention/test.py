@@ -1,3 +1,5 @@
+"""Support module with the test functions.
+"""
 import numpy as np
 import os
 import pytest
@@ -5,7 +7,13 @@ import torch
 
 from connect4_mcts.game import Game, GameResult
 from connect4_mcts.mcts import Node, MCTS
-from connect4_mcts.policy import ConvLayer, SqueezeExcitation, ResidualBlock, Network, Model
+from connect4_mcts.policy import (
+    ConvLayer,
+    SqueezeExcitation,
+    ResidualBlock,
+    Network,
+    Model,
+)
 from connect4_mcts.coach import Coach
 from connect4_mcts.players import RandomPlayer, MctsPlayer, ModelPlayer
 
@@ -18,7 +26,7 @@ def test_game():
     assert not game.is_terminal()
     assert not game._is_full()
     assert game.get_legal_moves() == list(range(Game.BOARD_WIDTH))
-    assert game.get_winner() == GameResult.GameOngoing
+    assert game.get_winner() == GameResult.GAME_ONGOING
     for _ in range(6):
         game.make_move(0)
     with pytest.raises(RuntimeError):
@@ -28,7 +36,7 @@ def test_game():
         game.make_move(1)
         game.make_move(2)
     game.make_move(1)
-    assert game.get_winner() == GameResult.RedWins
+    assert game.get_winner() == GameResult.RED_WINS
 
 
 def test_node():
@@ -49,9 +57,10 @@ def test_node():
 def test_tree():
     def uniform_policy(state):
         return np.ones(Game.NUM_ACTIONS) / Game.NUM_ACTIONS, np.ones(3) / 3
+
     game = Game()
     initial_state = game.get_state()
-    tree = MCTS(2 ** .5)
+    tree = MCTS(2**0.5)
     policy, wdl = tree.run(game, uniform_policy, 100)
     assert (game.get_state() == initial_state).all()
 
@@ -79,44 +88,41 @@ def test_res_block():
 
 def test_net():
     net = Network(128, 10)
-    x = torch.randn(
-        (10, Game.STATE_LAYERS, Game.STATE_HEIGHT, Game.STATE_WIDTH))
+    x = torch.randn((10, Game.STATE_LAYERS, Game.STATE_HEIGHT, Game.STATE_WIDTH))
     pol, wdl = net(x)
     assert pol.size() == (10, Game.NUM_ACTIONS)
     assert wdl.size() == (10, 3)
 
 
 def test_model():
-    model = Model(8, 1, 1e-4, 'cpu')
-    state = np.random.randn(
-        Game.STATE_LAYERS, Game.STATE_HEIGHT, Game.STATE_WIDTH)
+    model = Model(8, 1, 1e-4, "cpu")
+    state = np.random.randn(Game.STATE_LAYERS, Game.STATE_HEIGHT, Game.STATE_WIDTH)
     pol, wdl = model.policy_function(state)
     assert pol.shape == (Game.NUM_ACTIONS,)
     assert wdl.shape == (3,)
-    states = np.random.randn(
-        10, Game.STATE_LAYERS, Game.STATE_HEIGHT, Game.STATE_WIDTH)
+    states = np.random.randn(10, Game.STATE_LAYERS, Game.STATE_HEIGHT, Game.STATE_WIDTH)
     y_wdl = np.random.randn(10, 3)
     y_wdl = y_wdl / np.sum(y_wdl, -1, keepdims=True)
     y_pol = np.random.randn(10, Game.NUM_ACTIONS)
     y_pol = y_pol / np.sum(y_pol, -1, keepdims=True)
     model.train(states, y_pol, y_wdl, 3)
     before_save = model.policy_function(state)
-    model.save('test.pt')
-    new_model = Model(8, 1, 1e-3, 'cpu')
-    new_model.load('test.pt')
-    if os.path.exists('test.pt'):
-        os.remove('test.pt')
+    model.save("test.pt")
+    new_model = Model(8, 1, 1e-3, "cpu")
+    new_model.load("test.pt")
+    if os.path.exists("test.pt"):
+        os.remove("test.pt")
     after_save = new_model.policy_function(state)
     assert (before_save[0] == after_save[0]).all()
     assert (before_save[1] == after_save[1]).all()
 
 
 def test_coach():
-    model = Model(8, 1, 1e-4, 'cpu')
+    model = Model(8, 1, 1e-4, "cpu")
     coach = Coach(model, 10)
-    coach.generate_game(2 ** .5, 10, 1)
-    coach.generate_game(2 ** .5, 10, 0)
-    coach.generate_games(2, 2 ** .5, 10, 0)
+    coach.generate_game(2**0.5, 10, 1)
+    coach.generate_game(2**0.5, 10, 0)
+    coach.generate_games(2, 2**0.5, 10, 0)
     coach.train(16, 4)
     coach.train_epochs(16, 4, 1)
 
@@ -132,7 +138,7 @@ def test_random_player():
 
 def test_model_player():
     game = Game()
-    model = Model(8, 1, 1e-4, 'cpu')
+    model = Model(8, 1, 1e-4, "cpu")
     player = ModelPlayer(game, model)
     while not game.is_terminal():
         move = player.get_move()
@@ -142,8 +148,8 @@ def test_model_player():
 
 def test_mcts_player_with_temp_zero():
     game = Game()
-    model = Model(8, 1, 1e-4, 'cpu')
-    player = MctsPlayer(game, model, 2 ** .5, 10, 0)
+    model = Model(8, 1, 1e-4, "cpu")
+    player = MctsPlayer(game, model, 2**0.5, 10, 0)
     while not game.is_terminal():
         move = player.get_move()
         game.make_move(move)
@@ -152,8 +158,8 @@ def test_mcts_player_with_temp_zero():
 
 def test_mcts_player():
     game = Game()
-    model = Model(8, 1, 1e-4, 'cpu')
-    player = MctsPlayer(game, model, 2 ** .5, 10, 1)
+    model = Model(8, 1, 1e-4, "cpu")
+    player = MctsPlayer(game, model, 2**0.5, 10, 1)
     while not game.is_terminal():
         move = player.get_move()
         game.make_move(move)
