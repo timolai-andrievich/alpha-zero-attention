@@ -80,7 +80,7 @@ def create_app() -> Flask:
     Returns:
         Flask: App.
     """
-    model = ModelWrapper(256, 1, 1e-4, "cpu")
+    model = ModelWrapper(128, 10, 1e-4, "cpu")
     app = Flask(__name__)
     CORS(app)
     @app.route("/")

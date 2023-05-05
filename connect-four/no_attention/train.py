@@ -68,11 +68,10 @@ def main():
             config["playout"],
             config["temp"],
         )
-        loss = model_coach.train_epochs(
+        model_coach.train_epochs(
             config["batch_size"], config["minibatch_size"], config["epochs"]
         )
         model.save(args.output_model)
-        pbar.set_description(f"loss: {loss:.4f}")
     model.save(args.output_model)
 
 
